@@ -14,19 +14,26 @@
  * limitations under the License.
  */
 
-package utils
+package models
 
-import uk.gov.hmrc.http.cache.client.CacheMap
-import identifiers._
-import models._
+import utils.{Enumerable, RadioOption, WithName}
 
-class UserAnswers(val cacheMap: CacheMap) extends Enumerable.Implicits {
-  def yourDetails: Option[YourDetails] = cacheMap.getEntry[YourDetails](YourDetailsId.toString)
+sealed trait Location
 
-  def location: Option[Location] = cacheMap.getEntry[Location](LocationId.toString)
+object Location {
 
-  def childAgedTwo: Option[Boolean] = cacheMap.getEntry[Boolean](ChildAgedTwoId.toString)
+  case object England extends WithName("england") with Location
+  case object Scotland extends WithName("scotland") with Location
 
-  def childAgedThreeOrFour: Option[Boolean] = cacheMap.getEntry[Boolean](ChildAgedThreeOrFourId.toString)
+  val values: Set[Location] = Set(
+    England, Scotland
+  )
 
+  val options: Set[RadioOption] = values.map {
+    value =>
+      RadioOption("location", value.toString)
+  }
+
+  implicit val enumerable: Enumerable[Location] =
+    Enumerable(values.toSeq.map(v => v.toString -> v): _*)
 }

@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
-package utils
+package forms
 
-import uk.gov.hmrc.http.cache.client.CacheMap
-import identifiers._
-import models._
+import javax.inject.Inject
 
-class UserAnswers(val cacheMap: CacheMap) extends Enumerable.Implicits {
-  def yourDetails: Option[YourDetails] = cacheMap.getEntry[YourDetails](YourDetailsId.toString)
+import forms.mappings.Mappings
+import play.api.data.Form
+import play.api.data.Forms._
+import models.YourDetails
 
-  def location: Option[Location] = cacheMap.getEntry[Location](LocationId.toString)
+class YourDetailsFormProvider @Inject() extends Mappings {
 
-  def childAgedTwo: Option[Boolean] = cacheMap.getEntry[Boolean](ChildAgedTwoId.toString)
-
-  def childAgedThreeOrFour: Option[Boolean] = cacheMap.getEntry[Boolean](ChildAgedThreeOrFourId.toString)
-
-}
+   def apply(): Form[YourDetails] = Form(
+     mapping(
+      "field1" -> text("yourDetails.error.field1.required")
+        .verifying(maxLength(100, "yourDetails.error.field1.length")),
+      "field2" -> text("yourDetails.error.field2.required")
+        .verifying(maxLength(100, "yourDetails.error.field2.length"))
+    )(YourDetails.apply)(YourDetails.unapply)
+   )
+ }

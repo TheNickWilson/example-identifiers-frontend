@@ -14,19 +14,12 @@
  * limitations under the License.
  */
 
-package utils
+package models
 
-import uk.gov.hmrc.http.cache.client.CacheMap
-import identifiers._
-import models._
+import play.api.libs.json._
 
-class UserAnswers(val cacheMap: CacheMap) extends Enumerable.Implicits {
-  def yourDetails: Option[YourDetails] = cacheMap.getEntry[YourDetails](YourDetailsId.toString)
+case class YourDetails (field1: String, field2: String)
 
-  def location: Option[Location] = cacheMap.getEntry[Location](LocationId.toString)
-
-  def childAgedTwo: Option[Boolean] = cacheMap.getEntry[Boolean](ChildAgedTwoId.toString)
-
-  def childAgedThreeOrFour: Option[Boolean] = cacheMap.getEntry[Boolean](ChildAgedThreeOrFourId.toString)
-
+object YourDetails {
+  implicit val format = Json.format[YourDetails]
 }

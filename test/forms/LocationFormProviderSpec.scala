@@ -14,19 +14,32 @@
  * limitations under the License.
  */
 
-package utils
+package forms
 
-import uk.gov.hmrc.http.cache.client.CacheMap
-import identifiers._
-import models._
+import forms.behaviours.OptionFieldBehaviours
+import models.Location
+import play.api.data.FormError
 
-class UserAnswers(val cacheMap: CacheMap) extends Enumerable.Implicits {
-  def yourDetails: Option[YourDetails] = cacheMap.getEntry[YourDetails](YourDetailsId.toString)
+class LocationFormProviderSpec extends OptionFieldBehaviours {
 
-  def location: Option[Location] = cacheMap.getEntry[Location](LocationId.toString)
+  val form = new LocationFormProvider()()
 
-  def childAgedTwo: Option[Boolean] = cacheMap.getEntry[Boolean](ChildAgedTwoId.toString)
+  ".value" must {
 
-  def childAgedThreeOrFour: Option[Boolean] = cacheMap.getEntry[Boolean](ChildAgedThreeOrFourId.toString)
+    val fieldName = "value"
+    val requiredKey = "location.error.required"
 
+    behave like optionsField[Location](
+      form,
+      fieldName,
+      validValues  = Location.values,
+      invalidError = FormError(fieldName, "error.invalid")
+    )
+
+    behave like mandatoryField(
+      form,
+      fieldName,
+      requiredError = FormError(fieldName, requiredKey)
+    )
+  }
 }

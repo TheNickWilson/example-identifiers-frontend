@@ -14,19 +14,32 @@
  * limitations under the License.
  */
 
-package utils
+package forms
 
-import uk.gov.hmrc.http.cache.client.CacheMap
-import identifiers._
-import models._
+import forms.behaviours.BooleanFieldBehaviours
+import play.api.data.FormError
 
-class UserAnswers(val cacheMap: CacheMap) extends Enumerable.Implicits {
-  def yourDetails: Option[YourDetails] = cacheMap.getEntry[YourDetails](YourDetailsId.toString)
+class ChildAgedTwoFormProviderSpec extends BooleanFieldBehaviours {
 
-  def location: Option[Location] = cacheMap.getEntry[Location](LocationId.toString)
+  val requiredKey = "childAgedTwo.error.required"
+  val invalidKey = "error.boolean"
 
-  def childAgedTwo: Option[Boolean] = cacheMap.getEntry[Boolean](ChildAgedTwoId.toString)
+  val form = new ChildAgedTwoFormProvider()()
 
-  def childAgedThreeOrFour: Option[Boolean] = cacheMap.getEntry[Boolean](ChildAgedThreeOrFourId.toString)
+  ".value" must {
 
+    val fieldName = "value"
+
+    behave like booleanField(
+      form,
+      fieldName,
+      invalidError = FormError(fieldName, invalidKey)
+    )
+
+    behave like mandatoryField(
+      form,
+      fieldName,
+      requiredError = FormError(fieldName, requiredKey)
+    )
+  }
 }

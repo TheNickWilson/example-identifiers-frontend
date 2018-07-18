@@ -21,4 +21,20 @@ import models.CheckMode
 import viewmodels.{AnswerRow, RepeaterAnswerRow, RepeaterAnswerSection}
 
 class CheckYourAnswersHelper(userAnswers: UserAnswers) {
+
+  def yourDetails: Option[AnswerRow] = userAnswers.yourDetails map {
+    x => AnswerRow("yourDetails.checkYourAnswersLabel", s"${x.field1} ${x.field2}", false, routes.YourDetailsController.onPageLoad(CheckMode).url)
+  }
+
+  def location: Option[AnswerRow] = userAnswers.location map {
+    x => AnswerRow("location.checkYourAnswersLabel", s"location.$x", true, routes.LocationController.onPageLoad(CheckMode).url)
+  }
+
+  def childAgedTwo: Option[AnswerRow] = userAnswers.childAgedTwo map {
+    x => AnswerRow("childAgedTwo.checkYourAnswersLabel", if(x) "site.yes" else "site.no", true, routes.ChildAgedTwoController.onPageLoad(CheckMode).url)
+  }
+
+  def childAgedThreeOrFour: Option[AnswerRow] = userAnswers.childAgedThreeOrFour map {
+    x => AnswerRow("childAgedThreeOrFour.checkYourAnswersLabel", if(x) "site.yes" else "site.no", true, routes.ChildAgedThreeOrFourController.onPageLoad(CheckMode).url)
+  }
 }

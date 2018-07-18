@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-package utils
+package forms
 
-import uk.gov.hmrc.http.cache.client.CacheMap
-import identifiers._
-import models._
+import javax.inject.Inject
 
-class UserAnswers(val cacheMap: CacheMap) extends Enumerable.Implicits {
-  def yourDetails: Option[YourDetails] = cacheMap.getEntry[YourDetails](YourDetailsId.toString)
+import forms.mappings.Mappings
+import play.api.data.Form
+import models.Location
 
-  def location: Option[Location] = cacheMap.getEntry[Location](LocationId.toString)
+class LocationFormProvider @Inject() extends FormErrorHelper with Mappings {
 
-  def childAgedTwo: Option[Boolean] = cacheMap.getEntry[Boolean](ChildAgedTwoId.toString)
-
-  def childAgedThreeOrFour: Option[Boolean] = cacheMap.getEntry[Boolean](ChildAgedThreeOrFourId.toString)
-
+  def apply(): Form[Location] =
+    Form(
+      "value" -> enumerable[Location]("location.error.required")
+    )
 }
