@@ -38,7 +38,7 @@ class LocationControllerSpec extends ControllerSpecBase {
 
   def controller(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
     new LocationController(frontendAppConfig, messagesApi, FakeDataCacheConnector, new FakeNavigator(desiredRoute = onwardRoute), FakeIdentifierAction,
-      dataRetrievalAction, new DataRequiredActionImpl, formProvider)
+      dataRetrievalAction, formProvider)
 
   def viewAsString(form: Form[_] = form) = location(frontendAppConfig, form, NormalMode)(fakeRequest, messages).toString
 
@@ -79,19 +79,18 @@ class LocationControllerSpec extends ControllerSpecBase {
       contentAsString(result) mustBe viewAsString(boundForm)
     }
 
-    "redirect to Session Expired for a GET if no existing data is found" in {
+    "rreturn OK for a GET if no existing data is found" in {
       val result = controller(dontGetAnyData).onPageLoad(NormalMode)(fakeRequest)
 
-      status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(routes.SessionExpiredController.onPageLoad().url)
+      status(result) mustBe OK
     }
 
-    "redirect to Session Expired for a POST if no existing data is found" in {
+    "redirect to the next page for a POST if no existing data is found" in {
       val postRequest = fakeRequest.withFormUrlEncodedBody(("value", Location.options.head.value))
       val result = controller(dontGetAnyData).onSubmit(NormalMode)(postRequest)
 
       status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(routes.SessionExpiredController.onPageLoad().url)
+      redirectLocation(result) mustBe Some(onwardRoute.url)
     }
   }
 }

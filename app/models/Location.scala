@@ -16,6 +16,7 @@
 
 package models
 
+import play.api.libs.json._
 import utils.{Enumerable, RadioOption, WithName}
 
 sealed trait Location
@@ -24,9 +25,11 @@ object Location {
 
   case object England extends WithName("england") with Location
   case object Scotland extends WithName("scotland") with Location
+  case object Wales extends WithName("wales") with Location
+  case object NorthernIreland extends WithName("northernIreland") with Location
 
   val values: Set[Location] = Set(
-    England, Scotland
+    England, Scotland, Wales, NorthernIreland
   )
 
   val options: Set[RadioOption] = values.map {
@@ -36,4 +39,18 @@ object Location {
 
   implicit val enumerable: Enumerable[Location] =
     Enumerable(values.toSeq.map(v => v.toString -> v): _*)
+
+  implicit object LocationWrites extends Writes[Location] {
+    def writes(location: Location) = Json.toJson(location.toString)
+  }
+
+  implicit object LocationReads extends Reads[Location] {
+    override def reads(json: JsValue): JsResult[Location] = json match {
+      case JsString(England.toString)         => JsSuccess(England)
+      case JsString(Wales.toString)           => JsSuccess(Wales)
+      case JsString(Scotland.toString)        => JsSuccess(Scotland)
+      case JsString(NorthernIreland.toString) => JsSuccess(NorthernIreland)
+      case _                                  => JsError("Unknown location")
+    }
+  }
 }

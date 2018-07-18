@@ -40,21 +40,20 @@ class LocationController @Inject()(
                                         navigator: Navigator,
                                         identify: IdentifierAction,
                                         getData: DataRetrievalAction,
-                                        requireData: DataRequiredAction,
                                         formProvider: LocationFormProvider) extends FrontendController with I18nSupport with Enumerable.Implicits {
 
   val form = formProvider()
 
-  def onPageLoad(mode: Mode) = (identify andThen getData andThen requireData) {
+  def onPageLoad(mode: Mode) = (identify andThen getData) {
     implicit request =>
-      val preparedForm = request.userAnswers.location match {
+      val preparedForm = request.userAnswers.flatMap(_.location) match {
         case None => form
         case Some(value) => form.fill(value)
       }
       Ok(location(appConfig, preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode) = (identify andThen getData andThen requireData).async {
+  def onSubmit(mode: Mode) = (identify andThen getData).async {
     implicit request =>
       form.bindFromRequest().fold(
         (formWithErrors: Form[_]) =>

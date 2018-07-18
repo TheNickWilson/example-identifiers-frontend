@@ -17,16 +17,18 @@
 package utils
 
 import javax.inject.Singleton
-
 import play.api.libs.json._
 import uk.gov.hmrc.http.cache.client.CacheMap
 import identifiers._
+import models.Location
 
 @Singleton
 class CascadeUpsert {
 
   val funcMap: Map[String, (JsValue, CacheMap) => CacheMap] =
-    Map()
+    Map(
+      LocationId.toString -> cleanupLocation
+    )
 
   def apply[A](key: String, value: A, originalCacheMap: CacheMap)(implicit fmt: Format[A]): CacheMap =
     funcMap.get(key).fold(store(key, value, originalCacheMap)) { fn => fn(Json.toJson(value), originalCacheMap)}
@@ -45,5 +47,16 @@ class CascadeUpsert {
       case _ => cacheMap
     }
     store(key, value, mapToStore)
+  }
+
+  private def cleanupLocation(value: JsValue, cacheMap: CacheMap): CacheMap = {
+    val mapToStore = value match {
+      case JsString(Location.NorthernIreland.toString) =>
+        cacheMap copy (data = cacheMap.data - ChildAgedTwoId.toString)
+      case _ =>
+        cacheMap
+    }
+
+    store(LocationId.toString, value, mapToStore)
   }
 }

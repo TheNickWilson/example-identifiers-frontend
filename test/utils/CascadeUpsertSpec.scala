@@ -18,11 +18,15 @@ package utils
 
 import play.api.libs.json._
 import base.SpecBase
+import generators.Generators
 import identifiers._
 import models._
+import models.Location._
+import org.scalacheck.Arbitrary.arbitrary
+import org.scalatest.prop.PropertyChecks
 import uk.gov.hmrc.http.cache.client.CacheMap
 
-class CascadeUpsertSpec extends SpecBase {
+class CascadeUpsertSpec extends SpecBase with PropertyChecks with Generators {
 
   "using the apply method for a key that has no special function" when {
     "the key doesn't already exists" must {
@@ -60,6 +64,26 @@ class CascadeUpsertSpec extends SpecBase {
         val cascadeUpsert = new CascadeUpsert
         val result = cascadeUpsert.addRepeatedValue("key", "new value", originalCacheMap)
         result.data mustBe Map("key" -> Json.toJson(Seq("value", "new value")))
+      }
+    }
+  }
+
+  "saving Location" when {
+
+    "the answer is NorthernIreland" must {
+
+      "remove the value for ChildAgedTwo" in {
+
+        forAll(nonEmptyString, arbitrary[Boolean]) {
+          case (cacheId, childAgedTwo) =>
+
+            val originalCacheMap = new CacheMap(cacheId, Map(ChildAgedTwoId.toString -> JsBoolean(childAgedTwo)))
+            val cascadeUpsert = new CascadeUpsert
+
+            val result = cascadeUpsert.apply[Location](LocationId.toString, Location.NorthernIreland, originalCacheMap)
+
+            result.data mustEqual Map(LocationId.toString -> JsString(Location.NorthernIreland.toString))
+        }
       }
     }
   }
